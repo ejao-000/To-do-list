@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Do It. — To-Do App</title>
+   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Crimson+Pro:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet"/>
+  
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --paper: #f5f0e8;
+  --paper2: #ede7d4;
+  --ink: #1a1208;
+  --ink-light: #6b5c3e;
+  --ink-faint: #b8a98a;
+  --red: #c0392b;
+  --green: #2d6a4f;
+  --line: #d4c9ae;
+}
+
+body {
+  background: var(--paper2);
+  min-height: 100vh;
+  font-family: 'Crimson Pro', serif;
+  color: var(--ink);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 3rem 1rem 5rem;
+}
+
+.notebook {
+  width: 100%; max-width: 560px;
+  background: var(--paper);
+  box-shadow: -6px 0 0 #d4c5a9, 4px 4px 0 #c4b590, 8px 8px 0 #b8a880, 0 20px 60px rgba(0,0,0,0.18);
+  position: relative;
+  border-radius: 2px 4px 4px 2px;
+}
+
+.notebook::before {
+  content: '';
+  position: absolute;
+  left: 52px; top: 0; bottom: 0;
+  width: 1.5px;
+  background: rgba(192, 57, 43, 0.35);
+  pointer-events: none;
+}
+
+.spiral {
+  position: absolute;
+  left: -18px; top: 0; bottom: 0; width: 18px;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: space-around;
+  padding: 2rem 0; pointer-events: none;
+}
+.ring {
+  width: 22px; height: 22px;
+  border: 3px solid #8a7560;
+  border-radius: 50%;
+  background: var(--paper2);
+}
+
+.lined-area {
+  background-image: repeating-linear-gradient(
+    to bottom, transparent, transparent 39px, var(--line) 39px, var(--line) 40px
+  );
+  background-position: 0 80px;
+}
+
+.header { padding: 2rem 2.5rem 1.5rem 4rem; border-bottom: 2px solid var(--line); }
+.header-date { font-size: 0.75rem; color: var(--ink-faint); margin-bottom: 0.25rem; }
+.header-title { font-family: 'Playfair Display', serif; font-size: 2.6rem; font-weight: 700; }
+.header-title em { font-style: italic; color: var(--red); }
+.header-subtitle { font-size: 0.95rem; color: var(--ink-light); font-style: italic; margin-top: 0.3rem; }
+
+.stats { display: flex; gap: 2rem; padding: 0.9rem 2.5rem 0.9rem 4rem; border-bottom: 1px solid var(--line); font-size: 0.8rem; color: var(--ink-light); }
+.stats strong { color: var(--ink); font-family: 'Playfair Display', serif; font-size: 1rem; font-weight: 400; }
+
+.progress-wrap { padding: 0.6rem 2.5rem 0.6rem 4rem; border-bottom: 1px solid var(--line); }
+.progress-bar { height: 4px; background: var(--line); border-radius: 2px; overflow: hidden; }
+.progress-fill { height: 100%; background: var(--green); border-radius: 2px; transition: width 0.5s ease; }
+
+.input-row { display: flex; align-items: center; padding: 0.75rem 1.5rem 0.75rem 4rem; border-bottom: 1px solid var(--line); gap: 0.75rem; background: rgba(255,255,255,0.3); }
+.add-btn { width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--ink-faint); background: none; cursor: pointer; font-size: 1.2rem; color: var(--ink-faint); transition: all 0.2s; }
+.add-btn:hover { border-color: var(--green); color: var(--green); transform: scale(1.1); }
+#new-task { flex: 1; border: none; background: transparent; font-family: 'Crimson Pro', serif; font-size: 1.05rem; color: var(--ink); outline: none; line-height: 40px; }
+#new-task::placeholder { color: var(--ink-faint); font-style: italic; }
+.cat-select { border: none; background: none; font-family: 'Crimson Pro', serif; font-size: 0.75rem; color: var(--ink-faint); outline: none; cursor: pointer; }
+
+.filters { display: flex; padding: 0.6rem 2.5rem 0.6rem 4rem; border-top: 2px solid var(--line); border-bottom: 1px solid var(--line); }
+.filter-btn { background: none; border: none; font-family: 'Crimson Pro', serif; font-size: 0.85rem; color: var(--ink-faint); cursor: pointer; padding: 0.2rem 0.8rem; border-radius: 1rem; transition: all 0.2s; }
+.filter-btn.active { background: var(--ink); color: var(--paper); }
+
+.tasks { list-style: none; min-height: 320px; padding-bottom: 1rem; }
+.task-item { display: flex; align-items: center; gap: 1rem; padding: 0 1.5rem 0 4rem; height: 40px; position: relative; animation: slideIn 0.3s ease; }
+.task-item:hover .task-delete { opacity: 1; }
+@keyframes slideIn { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
+
+.task-check { width: 18px; height: 18px; border: 1.5px solid var(--ink-faint); border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.2s; }
+.task-check:hover { border-color: var(--green); }
+.task-check.checked { background: var(--green); border-color: var(--green); }
+.task-check.checked::after { content: '✓'; color: white; font-size: 0.65rem; font-weight: bold; }
+
+.task-text { flex: 1; font-size: 1.05rem; line-height: 40px; color: var(--ink); transition: all 0.3s; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.task-text.done { text-decoration: line-through; color: var(--ink-faint); font-style: italic; }
+.task-cat { font-size: 0.65rem; color: var(--ink-faint); font-style: italic; flex-shrink: 0; }
+.task-delete { opacity: 0; background: none; border: none; cursor: pointer; color: var(--red); font-size: 0.9rem; transition: opacity 0.2s, transform 0.2s; flex-shrink: 0; }
+.task-delete:hover { transform: scale(1.2); }
+
+.empty { text-align: center; padding: 3rem 2rem; color: var(--ink-faint); font-style: italic; font-size: 1.1rem; display: none; }
+.empty.show { display: block; }
+
+.notebook-footer { padding: 0.8rem 2.5rem 1.2rem 4rem; display: flex; justify-content: space-between; align-items: center; }
+.clear-btn { background: none; border: none; font-family: 'Crimson Pro', serif; font-size: 0.8rem; color: var(--ink-faint); cursor: pointer; font-style: italic; text-decoration: underline; transition: color 0.2s; }
+.clear-btn:hover { color: var(--red); }
+.page-num { font-size: 0.75rem; color: var(--ink-faint); }
+  </style>
+
+</head>
+<body>
+
+  <div class="notebook">
+  <div class="spiral">
+    <div class="ring"></div><div class="ring"></div><div class="ring"></div>
+    <div class="ring"></div><div class="ring"></div><div class="ring"></div>
+    <div class="ring"></div><div class="ring"></div><div class="ring"></div>
+    <div class="ring"></div><div class="ring"></div><div class="ring"></div>
+  </div>
+
+  <div class="header">
+    <div class="header-date" id="today-date"></div>
+    <div class="header-title">Do <em>It.</em></div>
+    <div class="header-subtitle">A place for things that matter.</div>
+  </div>
+
+  <div class="stats">
+    <div><strong id="stat-total">0</strong> tasks</div>
+    <div><strong id="stat-done">0</strong> done</div>
+    <div><strong id="stat-left">0</strong> remaining</div>
+  </div>
+
+  <div class="progress-wrap">
+    <div class="progress-bar">
+      <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+    </div>
+  </div>
+
+  <div class="input-row">
+    <button class="add-btn" id="add-btn">+</button>
+    <input type="text" id="new-task" placeholder="Write something to do…" maxlength="80"/>
+    <select class="cat-select" id="cat-select">
+      <option value="">— tag —</option>
+      <option value="work">work</option>
+      <option value="personal">personal</option>
+      <option value="study">study</option>
+      <option value="errand">errand</option>
+    </select>
+  </div>
+
+  <div class="filters">
+    <button class="filter-btn active" data-filter="all">All</button>
+    <button class="filter-btn" data-filter="active">Active</button>
+    <button class="filter-btn" data-filter="done">Done</button>
+  </div>
+
+  <ul class="tasks lined-area" id="task-list"></ul>
+  <div class="empty" id="empty-state">Nothing here yet — add your first task above ✎</div>
+
+  <div class="notebook-footer">
+    <button class="clear-btn" id="clear-done">Clear completed</button>
+    <span class="page-num">pg. 1</span>
+  </div>
+</div>
+
+  <script>
+    // Set today's date
+const dateEl = document.getElementById('today-date');
+const now = new Date();
+dateEl.textContent = now.toLocaleDateString('en-US', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+
+let tasks = JSON.parse(localStorage.getItem('doittasks') || '[]');
+let currentFilter = 'all';
+
+function save() {
+  localStorage.setItem('doittasks', JSON.stringify(tasks));
+}
+
+function updateStats() {
+  const total = tasks.length;
+  const done = tasks.filter(t => t.done).length;
+  document.getElementById('stat-total').textContent = total;
+  document.getElementById('stat-done').textContent = done;
+  document.getElementById('stat-left').textContent = total - done;
+  const pct = total === 0 ? 0 : Math.round((done / total) * 100);
+  document.getElementById('progress-fill').style.width = pct + '%';
+}
+
+function getFiltered() {
+  if (currentFilter === 'active') return tasks.filter(t => !t.done);
+  if (currentFilter === 'done') return tasks.filter(t => t.done);
+  return tasks;
+}
+
+function escHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function render() {
+  const list = document.getElementById('task-list');
+  const filtered = getFiltered();
+  list.innerHTML = '';
+
+  const empty = document.getElementById('empty-state');
+  empty.classList.toggle('show', filtered.length === 0);
+
+  filtered.forEach((task) => {
+    const realIdx = tasks.indexOf(task);
+    const li = document.createElement('li');
+    li.className = 'task-item';
+    li.innerHTML = `
+      <div class="task-check ${task.done ? 'checked' : ''}" data-idx="${realIdx}"></div>
+      <span class="task-text ${task.done ? 'done' : ''}">${escHtml(task.text)}</span>
+      ${task.cat ? `<span class="task-cat">${escHtml(task.cat)}</span>` : ''}
+      <button class="task-delete" data-idx="${realIdx}">✕</button>
+    `;
+    list.appendChild(li);
+  });
+
+  updateStats();
+}
+
+function addTask() {
+  const input = document.getElementById('new-task');
+  const cat = document.getElementById('cat-select').value;
+  const text = input.value.trim();
+  if (!text) { input.focus(); return; }
+  tasks.unshift({ text, cat, done: false, id: Date.now() });
+  input.value = '';
+  document.getElementById('cat-select').value = '';
+  save();
+  render();
+}
+
+document.getElementById('task-list').addEventListener('click', e => {
+  const checkEl = e.target.closest('.task-check');
+  const delEl = e.target.closest('.task-delete');
+  if (checkEl) {
+    const idx = parseInt(checkEl.dataset.idx);
+    tasks[idx].done = !tasks[idx].done;
+    save(); render();
+  }
+  if (delEl) {
+    const idx = parseInt(delEl.dataset.idx);
+    tasks.splice(idx, 1);
+    save(); render();
+  }
+});
+
+document.getElementById('add-btn').addEventListener('click', addTask);
+document.getElementById('new-task').addEventListener('keydown', e => {
+  if (e.key === 'Enter') addTask();
+});
+
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentFilter = btn.dataset.filter;
+    render();
+  });
+});
+
+document.getElementById('clear-done').addEventListener('click', () => {
+  tasks = tasks.filter(t => !t.done);
+  save(); render();
+});
+
+render();
+
+  </script>
+
+</body>
+</html>
