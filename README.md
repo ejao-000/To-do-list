@@ -82,11 +82,7 @@ todo.html
 
 ## 👤 Author
 
-**Your Name**
+**Emmaculate Jane**
 - GitHub: [@ejao-000](https://github.com/ejao-000)
 
----
 
-## 📄 License
-
-This project is open source and available under the [MIT License](LICENSE).
