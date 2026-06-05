@@ -1,0 +1,719 @@
+/* ============================================================
+   style.css — Notebook To-Do App Stylesheet
+   Sections:
+     1. CSS Variables (Design Tokens)
+     2. Reset & Base
+     3. Body / Page Background
+     4. Notebook Wrapper
+     5. Spiral Binding
+     6. Page (ruled lines + margin)
+     7. Header
+     8. Stats Bar
+     9. Progress Bar
+    10. Input Area
+    11. Filter Tabs
+    12. Task List & Task Items
+    13. Tag Colours
+    14. Empty State
+    15. Footer
+    16. Toast Notification
+    17. Animations
+    18. Responsive (Mobile)
+   ============================================================ */
+
+
+/* ──────────────────────────────────────────────────────────
+   1. CSS VARIABLES (Design Tokens)
+   ────────────────────────────────────────────────────────── */
+:root {
+  /* Paper tones */
+  --paper:        #faf8f2;
+  --paper-dark:   #f0ece0;
+  --paper-mid:    #e8e3d3;
+
+  /* Ink tones */
+  --ink:          #2c2416;
+  --ink-light:    #6b5f4a;
+  --ink-faint:    #b8ad98;
+
+  /* Structural */
+  --spiral:       #c8c0a8;
+  --line:         #d4ceba;
+  --red-margin:   #e8a0a0;
+
+  /* Accent (green) */
+  --accent:       #5c7a5a;
+  --accent-light: #8aac88;
+  --accent-pale:  #d4e8d2;
+
+  /* Tag colours */
+  --tag-work:     #7a6c5a;
+  --tag-personal: #7a5a6c;
+  --tag-study:    #5a6c7a;
+  --tag-errand:   #7a7a5a;
+
+  /* Misc */
+  --done-ink:     #a09880;
+  --shadow:       rgba(44, 36, 22, 0.12);
+}
+
+
+/* ──────────────────────────────────────────────────────────
+   2. RESET & BASE
+   ────────────────────────────────────────────────────────── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+ul {
+  list-style: none;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+
+/* ──────────────────────────────────────────────────────────
+   3. BODY / PAGE BACKGROUND
+   ────────────────────────────────────────────────────────── */
+html,
+body {
+  min-height: 100vh;
+  background-color: #d6d0c4;
+  background-image:
+    radial-gradient(ellipse at 20% 10%, #c8bfaa 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 90%, #bfb8a8 0%, transparent 60%);
+  font-family: 'Crimson Pro', Georgia, serif;
+  color: var(--ink);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 40px 16px 60px;
+}
+
+
+/* ──────────────────────────────────────────────────────────
+   4. NOTEBOOK WRAPPER
+   ────────────────────────────────────────────────────────── */
+.notebook {
+  width: 100%;
+  max-width: 680px;
+  background: var(--paper);
+  border-radius: 4px 12px 12px 4px;
+
+  /* layered box-shadow creates the multi-page spine effect */
+  box-shadow:
+    -6px  0   0 #a09880,
+    -12px 0   0 #b8b0a0,
+    0     8px 40px rgba(0, 0, 0, 0.25),
+    0     2px  6px rgba(0, 0, 0, 0.15);
+
+  position: relative;
+  overflow: hidden;
+}
+
+
+/* ──────────────────────────────────────────────────────────
+   5. SPIRAL BINDING
+   ────────────────────────────────────────────────────────── */
+.spirals {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 44px;
+  background: #b0a890;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 36px;
+  gap: 36px;
+  z-index: 10;
+}
+
+.spiral-hole {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #d6d0c4;
+  box-shadow:
+    inset 0 2px 4px rgba(0, 0, 0, 0.3),
+    0 1px 0 rgba(255, 255, 255, 0.2);
+  flex-shrink: 0;
+}
+
+
+/* ──────────────────────────────────────────────────────────
+   6. PAGE (ruled lines + margin line)
+   ────────────────────────────────────────────────────────── */
+.page {
+  margin-left: 44px;    /* clear the spiral column */
+  min-height: 600px;
+  position: relative;
+
+  /* CSS trick: two stacked background gradients draw the ruled lines */
+  background-image:
+    linear-gradient(var(--red-margin) 1px, transparent 1px),  /* top red rule */
+    linear-gradient(var(--line) 1px, transparent 1px);         /* grey ruled lines */
+  background-size:
+    100% 1px,    /* single line height */
+    100% 36px;   /* repeat every 36px */
+  background-position:
+    0 84px,
+    0 84px;
+}
+
+/* Red margin line (left side vertical) */
+.page::before {
+  content: '';
+  position: absolute;
+  left: 52px;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--red-margin);
+  opacity: 0.6;
+  z-index: 1;
+}
+
+
+/* ──────────────────────────────────────────────────────────
+   7. HEADER
+   ────────────────────────────────────────────────────────── */
+.header {
+  padding: 24px 32px 20px 68px;
+  border-bottom: 2px solid var(--line);
+  position: relative;
+  background: var(--paper);
+  z-index: 2;
+}
+
+.header-date {
+  font-family: 'Crimson Pro', serif;
+  font-size: 12px;
+  font-style: italic;
+  color: var(--ink-light);
+  letter-spacing: 0.05em;
+  margin-bottom: 4px;
+}
+
+.header h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+.header h1 em {
+  font-style: italic;
+  color: var(--accent);
+}
+
+.header-sub {
+  font-size: 13px;
+  color: var(--ink-faint);
+  margin-top: 4px;
+  font-style: italic;
+}
+
+
+/* ──────────────────────────────────────────────────────────
+   8. STATS BAR
+   ────────────────────────────────────────────────────────── */
+.stats-bar {
+  display: flex;
+  gap: 24px;
+  padding: 12px 32px 0 68px;
+  background: var(--paper);
+  position: relative;
+  z-index: 2;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.stat-num {
+  font-family: 'Playfair Display', serif;
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--ink);
+  line-height: 1;
+}
+
+.stat-label {
+  font-size: 10px;
+  color: var(--ink-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-top: 2px;
+}
+
+.stat-divider {
+  width: 1px;
+  background: var(--line);
+  height: 32px;
+  margin-top: 4px;
+}
+
+
+/* ──────────────────────────────────────────────────────────
+   9. PROGRESS BAR
+   ────────────────────────────────────────────────────────── */
+.progress-wrap {
+  padding: 10px 32px 0 68px;
+  background: var(--paper);
+  position: relative;
+  z-index: 2;
+}
+
+.progress-bar {
+  height: 5px;
+  background: var(--paper-mid);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--accent), var(--accent-light));
+  border-radius: 3px;
+  transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.progress-label {
+  font-size: 11px;
+  color: var(--ink-faint);
+  margin-top: 4px;
+  font-style: italic;
+  text-align: right;
+}
+
+
+/* ──────────────────────────────────────────────────────────
+   10. INPUT AREA
+   ────────────────────────────────────────────────────────── */
+.input-area {
+  display: flex;
+  gap: 8px;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  padding: 16px 32px 0 68px;
+  background: var(--paper);
+  position: relative;
+  z-index: 2;
+}
+
+.input-row {
+  display: flex;
+  gap: 8px;
+  flex: 1;
+  min-width: 200px;
+}
+
+/* Text input */
+.task-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  border-bottom: 1.5px solid var(--ink-faint);
+  padding: 6px 2px;
+  font-family: 'Crimson Pro', serif;
+  font-size: 17px;
+  color: var(--ink);
+  outline: none;
+  transition: border-color 0.2s;
+  caret-color: var(--accent);
+}
+
+.task-input::placeholder {
+  color: var(--ink-faint);
+  font-style: italic;
+}
+
+.task-input:focus {
+  border-bottom-color: var(--accent);
+}
+
+/* Tag dropdown */
+.tag-select {
+  background: transparent;
+  border: none;
+  border-bottom: 1.5px solid var(--ink-faint);
+  padding: 6px 20px 6px 4px;
+  font-family: 'Crimson Pro', serif;
+  font-size: 14px;
+  color: var(--ink-light);
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.2s;
+  -webkit-appearance: none;
+  appearance: none;
+
+  /* Custom dropdown arrow via inline SVG */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23b8ad98'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 2px center;
+}
+
+.tag-select:focus {
+  border-bottom-color: var(--accent);
+}
+
+/* Add (+) button */
+.add-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1.5px solid var(--accent);
+  background: transparent;
+  color: var(--accent);
+  font-size: 22px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.2s;
+}
+
+.add-btn:hover {
+  background: var(--accent);
+  color: white;
+  transform: rotate(90deg);
+}
+
+
+/* ──────────────────────────────────────────────────────────
+   11. FILTER TABS
+   ────────────────────────────────────────────────────────── */
+.filter-area {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 32px 0 68px;
+  background: var(--paper);
+  position: relative;
+  z-index: 2;
+}
+
+.filters {
+  display: flex;
+  border-bottom: 1px solid var(--line);
+}
+
+.filter-btn {
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  padding: 6px 14px;
+  font-family: 'Crimson Pro', serif;
+  font-size: 14px;
+  color: var(--ink-faint);
+  letter-spacing: 0.03em;
+  transition: all 0.2s;
+}
+
+.filter-btn:hover {
+  color: var(--ink-light);
+}
+
+.filter-btn.active {
+  color: var(--ink);
+  border-bottom-color: var(--accent);
+  font-weight: 500;
+}
+
+/* Clear completed link-style button */
+.clear-btn {
+  background: none;
+  border: none;
+  font-family: 'Crimson Pro', serif;
+  font-size: 12px;
+  color: var(--ink-faint);
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  font-style: italic;
+  padding: 4px;
+  transition: color 0.2s;
+}
+
+.clear-btn:hover {
+  color: #c0392b;
+}
+
+.clear-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+
+/* ──────────────────────────────────────────────────────────
+   12. TASK LIST & TASK ITEMS
+   ────────────────────────────────────────────────────────── */
+.tasks-section {
+  padding: 8px 32px 32px 68px;
+  position: relative;
+  z-index: 2;
+  min-height: 200px;
+}
+
+/* Individual task row */
+.task-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 10px 4px;
+  border-bottom: 1px solid var(--line);
+  position: relative;
+  transition: all 0.25s ease;
+  animation: slideIn 0.3s ease forwards;
+}
+
+/* Hide delete button until hover */
+.task-item:hover .delete-btn {
+  opacity: 1;
+}
+
+/* Circle checkbox button */
+.check-circle {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1.5px solid var(--ink-faint);
+  background: transparent;
+  flex-shrink: 0;
+  margin-top: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.check-circle:hover {
+  border-color: var(--accent);
+  background: var(--accent-pale);
+}
+
+/* Checked state */
+.task-item.done .check-circle {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+/* SVG tick — hidden by default, shown when done */
+.check-circle svg {
+  display: none;
+}
+
+.task-item.done .check-circle svg {
+  display: block;
+}
+
+/* Task text container */
+.task-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.task-text {
+  font-size: 17px;
+  line-height: 1.5;
+  color: var(--ink);
+  transition: all 0.2s;
+  word-break: break-word;
+}
+
+/* Strikethrough when done */
+.task-item.done .task-text {
+  color: var(--done-ink);
+  text-decoration: line-through;
+  text-decoration-color: var(--ink-faint);
+}
+
+/* Delete (✕) button */
+.delete-btn {
+  opacity: 0;
+  background: none;
+  border: none;
+  color: var(--ink-faint);
+  font-size: 16px;
+  line-height: 1;
+  padding: 2px 4px;
+  flex-shrink: 0;
+  margin-top: 1px;
+  transition: all 0.2s;
+}
+
+.delete-btn:hover {
+  color: #c0392b;
+  transform: scale(1.2);
+}
+
+
+/* ──────────────────────────────────────────────────────────
+   13. TAG COLOURS
+   ────────────────────────────────────────────────────────── */
+.task-tag {
+  display: inline-block;
+  font-size: 10px;
+  padding: 1px 7px;
+  border-radius: 10px;
+  margin-top: 3px;
+  font-style: italic;
+  letter-spacing: 0.04em;
+  text-transform: lowercase;
+}
+
+.tag-work     { background: #ede8e0; color: var(--tag-work); }
+.tag-personal { background: #ede0e8; color: var(--tag-personal); }
+.tag-study    { background: #e0e8ed; color: var(--tag-study); }
+.tag-errand   { background: #edede0; color: var(--tag-errand); }
+
+
+/* ──────────────────────────────────────────────────────────
+   14. EMPTY STATE
+   ────────────────────────────────────────────────────────── */
+.empty-state {
+  display: none;   /* shown via JS by adding .visible */
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--ink-faint);
+  font-style: italic;
+  font-size: 16px;
+}
+
+.empty-state.visible {
+  display: block;
+}
+
+.empty-state p:first-child {
+  font-family: 'Playfair Display', serif;
+  font-size: 20px;
+  color: var(--ink-light);
+  margin-bottom: 8px;
+}
+
+
+/* ──────────────────────────────────────────────────────────
+   15. FOOTER
+   ────────────────────────────────────────────────────────── */
+.page-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 32px 20px 68px;
+  background: var(--paper-dark);
+  border-top: 1px solid var(--line);
+  position: relative;
+  z-index: 2;
+}
+
+.footer-note {
+  font-size: 12px;
+  color: var(--ink-faint);
+  font-style: italic;
+}
+
+.footer-page {
+  font-family: 'Playfair Display', serif;
+  font-size: 14px;
+  color: var(--ink-faint);
+}
+
+
+/* ──────────────────────────────────────────────────────────
+   16. TOAST NOTIFICATION
+   ────────────────────────────────────────────────────────── */
+.toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: var(--ink);
+  color: var(--paper);
+  padding: 10px 18px;
+  border-radius: 6px;
+  font-family: 'Crimson Pro', serif;
+  font-size: 15px;
+  font-style: italic;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  opacity: 0;
+  transform: translateY(10px);
+  transition: all 0.3s ease;
+  pointer-events: none;
+  z-index: 999;
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+
+/* ──────────────────────────────────────────────────────────
+   17. ANIMATIONS
+   ────────────────────────────────────────────────────────── */
+
+/* Task slides in from left when added */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Task slides out right when deleted */
+@keyframes fadeOut {
+  to {
+    opacity: 0;
+    transform: translateX(20px);
+    max-height: 0;
+    padding: 0;
+  }
+}
+
+.task-item.removing {
+  animation: fadeOut 0.3s ease forwards;
+}
+
+
+/* ──────────────────────────────────────────────────────────
+   18. RESPONSIVE (Mobile ≤ 520px)
+   ────────────────────────────────────────────────────────── */
+@media (max-width: 520px) {
+  .header h1 {
+    font-size: 26px;
+  }
+
+  /* Hide red margin line on small screens */
+  .page::before {
+    display: none;
+  }
+
+  /* Reduce left padding for all sections */
+  .header,
+  .stats-bar,
+  .progress-wrap,
+  .input-area,
+  .filter-area,
+  .tasks-section,
+  .page-footer {
+    padding-left: 20px;
+  }
+}
